@@ -13,6 +13,7 @@ class FlightSearch:
         self._api_secret = os.getenv('AMADEUS_API_SECRET')
         self._token = self._get_new_token()
     
+    # Function to request a new OAuth token from Amadeus API
     def _get_new_token(self):
         header = {
             "content-type":"application/x-www-form-urlencoded"
@@ -26,6 +27,7 @@ class FlightSearch:
         token = response.json()['access_token']
         return token
     
+    # Function to get the IATA code for a city based on its name
     def get_destination_code(self,city_name):
         header = {
             "Authorization": f"Bearer {self._token}",
@@ -50,7 +52,8 @@ class FlightSearch:
             return "Not Found"
         return iata_code
     
-    def find_flights(self,origin,destination,departureDate,return_date,maxPrice):
+     # Function to find available flights between origin and destination
+    def find_flights(self,origin,destination,departureDate,return_date,is_direct=True):
         header = {
             "Authorization": f"Bearer {self._token}",
         }
@@ -60,9 +63,8 @@ class FlightSearch:
             "departureDate": departureDate.strftime("%Y-%m-%d"),
             "returnDate": return_date.strftime("%Y-%m-%d"),
             "adults": 1,
-            "nonStop": "true",
+            "nonStop": "true" if is_direct else "false",
             "currencyCode": "INR",
-            "maxPrice": maxPrice,
             "max": 10
         }
         response = requests.get(url=FLIGHT_ENDPOINT,headers=header,params=body)
