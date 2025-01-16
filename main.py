@@ -36,25 +36,27 @@ six_months_from_now = datetime.now() + timedelta(days=(6*30))
 # Loop through each destination in the sheet and search for both direct and indirect flights
 for destination in sheet_data:
     # Search for direct flights
+    print(f"Getting direct flights for {destination['city']}...")
     flights = flight_search.find_flights(
         origin=ORIGIN_CITY,
         destination=destination["iataCode"],
         departureDate=tomorrow,
         return_date=six_months_from_now,
     )
-    cheapest_flight = find_cheapest_flight(flight_offers=flights)
+    cheapest_flight = find_cheapest_flight(flights)
     print(f"{destination['city']}:{cheapest_flight.price}")
     time.sleep(2) # Add a delay to avoid hitting API limits
     
     # Search for Indirect Flights
-    flights = flight_search.find_flights(
-        origin=ORIGIN_CITY,
-        destination=destination["iataCode"],
-        departureDate=tomorrow,
-        return_date=six_months_from_now,
-        is_direct=False
-    )
-    cheapest_flight = find_cheapest_flight(flight_offers=flights)
+    if cheapest_flight.price == "N/A":
+        stopover_flights = flight_search.find_flights(
+            origin=ORIGIN_CITY,
+            destination=destination["iataCode"],
+            departureDate=tomorrow,
+            return_date=six_months_from_now,
+            is_direct=False
+        )
+    cheapest_flight = find_cheapest_flight(stopover_flights)
     print(f"Cheapest indirect flight price is:{cheapest_flight.price}")
     
     # If the cheapest flight is cheaper than the current lowest price in the sheet, send a notification
@@ -68,7 +70,7 @@ for destination in sheet_data:
                     f"from {cheapest_flight.origin_airport_code} to {cheapest_flight.destination_airport_code}, "\
                     f"with {cheapest_flight.stops} stop(s) departing on {cheapest_flight.departure_date} and returning on {cheapest_flight.return_date}"
         
-        print(f"Check your email.")
+        print(f"Check your email. Lower price flight found to {destination['city']}")
         
         # Send notifications via SMS, WhatsApp, and email
         notification_manager.send_sms(message_body=message)
