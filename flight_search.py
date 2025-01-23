@@ -68,5 +68,6 @@ class FlightSearch:
             "max": 10
         }
         response = requests.get(url=FLIGHT_ENDPOINT,headers=header,params=body)
+        response.raise_for_status()
         data = response.json()["data"]
         return data

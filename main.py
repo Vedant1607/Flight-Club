@@ -4,16 +4,21 @@ from flight_data import find_cheapest_flight
 from notification_manager import NotificationManager
 from datetime import datetime,timedelta
 import time
+import sys
 
 # Initialize the necessary classes for data management, flight search, and notifications
 data_manager = DataManager()
 flight_search = FlightSearch()
 notification_manager = NotificationManager()
 
+ORIGIN_CITY = "DEL"
+
 # Fetch data from the Sheety spreadsheet
 sheet_data = data_manager.get_sheet_data()
 
-ORIGIN_CITY = "DEL"
+if not sheet_data:
+    print("Error: Failed to fetch sheet data. Stopping further execution.")
+    sys.exit(1)  # Exit the program with an error status
 
 # Retrieve and update the IATA Codes for all cities in the sheet, and update the sheet data
 for row in sheet_data:

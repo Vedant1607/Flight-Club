@@ -16,9 +16,22 @@ class DataManager:
     
     # Function to retrieve sheet data (price information)
     def get_sheet_data(self):
-        response = requests.get(url=self.sheety_prices_endpoint)
-        self.destination_data = response.json()['prices']
-        return self.destination_data
+        try:
+            response = requests.get(url=self.sheety_prices_endpoint)
+            response.raise_for_status()  # Raise an HTTPError for bad responses (4xx and 5xx)
+            data = response.json()
+            
+            # Attempt to access the key
+            self.destination_data = data['prices']
+            return self.destination_data
+        except requests.exceptions.RequestException as e:
+            print(f"HTTP error occurred: {e}")
+        except KeyError as e:
+            print(f"KeyError occurred: {e}. The key 'prices' is missing in the response JSON.")
+        except ValueError as e:
+            print(f"ValueError: Failed to parse JSON. Error: {e}")
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
     
     # Function to update sheet data (adding IATA code to the price sheet)
     def update_sheet_data(self):
@@ -37,6 +50,16 @@ class DataManager:
     
     # Function to get customer email list from Sheety
     def get_customer_emails(self):
-        response = requests.get(url=self.sheety_users_endpoint)
-        self.customer_data = response.json()['users']
-        return self.customer_data
+        try:
+            response = requests.get(url=self.sheety_users_endpoint)
+            response.raise_for_status()
+            self.customer_data = response.json()['users']
+            return self.customer_data
+        except requests.exceptions.RequestException as e:
+                print(f"HTTP error occurred: {e}")
+        except KeyError as e:
+            print(f"KeyError occurred: {e}. The key 'users' is missing in the response JSON.")
+        except ValueError as e:
+            print(f"ValueError: Failed to parse JSON. Error: {e}")
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
