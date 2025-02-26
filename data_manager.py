@@ -17,7 +17,7 @@ class DataManager:
     # Function to retrieve sheet data (price information)
     def get_sheet_data(self):
         try:
-            response = requests.get(url=self.sheety_prices_endpoint)
+            response = requests.get(url=self.sheety_prices_endpoint, auth=self._authorization)
             response.raise_for_status()  # Raise an HTTPError for bad responses (4xx and 5xx)
             data = response.json()
             
@@ -43,7 +43,8 @@ class DataManager:
             }
             response = requests.put(
                 url=f"{self.sheety_prices_endpoint}/{city['id']}",
-                json=new_data
+                json=new_data,
+                auth=self._authorization
             )
             response.raise_for_status()
             print(response.text)
@@ -51,7 +52,7 @@ class DataManager:
     # Function to get customer email list from Sheety
     def get_customer_emails(self):
         try:
-            response = requests.get(url=self.sheety_users_endpoint)
+            response = requests.get(url=self.sheety_users_endpoint,auth=self._authorization)
             response.raise_for_status()
             self.customer_data = response.json()['users']
             return self.customer_data
